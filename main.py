@@ -1,0 +1,44 @@
+from flask import Flask, request, jsonify
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from tensorflow.keras.models import load_model
+
+
+app = Flask(__name__)
+
+model = load_model('wine_quality_model.h5')
+dataset = pd.read_csv('winequality-white.csv')
+feature_cols=['fixed acidity', 'citric acid', 'chlorides', 'free sulfur dioxide', 'density', 'sulphates', 'alcohol']
+X_train = dataset[feature_cols]
+
+scaler = StandardScaler()
+scaler.fit(X_train)
+
+@app.route('/api/predict', methods=['POST'])
+def predict():
+
+  data = request.json
+
+  input_data = pd.DataFrame([data], columns=feature_cols)
+  
+  input_data_scaled = scaler.transform(input_data)
+
+  predictions = model.predict(input_data_scaled)
+
+  #Transformar as previsões em classes
+  y_pred_class = predictions.argmax(axis=1)
+
+  max_prob_index = predictions.argmax()
+  max_prob_class = int(y_pred_class[0])
+  max_prob_percentage = round(predictions[0][max_prob_index] * 100, 2)
+
+
+  response = {
+    'prediction': max_prob_class,
+    'probability': max_prob_percentage 
+  }
+
+  return jsonify(response), 200
+
+if __name__ == '__main__':
+  app.run()
