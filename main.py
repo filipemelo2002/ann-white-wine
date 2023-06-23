@@ -35,7 +35,7 @@ def predict():
 
   max_prob_index = predictions.argmax()
   max_prob_class = int(y_pred_class[0])
-  max_prob_percentage = predictions[0][max_prob_index]
+  max_prob_percentage = str(predictions[0][max_prob_index])
 
 
   response = {
