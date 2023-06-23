@@ -1,10 +1,14 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS, cross_origin
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import load_model
 
 
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
+
 
 model = load_model('wine_quality_model.h5')
 dataset = pd.read_csv('winequality-white.csv')
@@ -15,6 +19,7 @@ scaler = StandardScaler()
 scaler.fit(X_train)
 
 @app.route('/api/predict', methods=['POST'])
+@cross_origin()
 def predict():
 
   data = request.json
